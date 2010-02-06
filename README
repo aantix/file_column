@@ -1,5 +1,6 @@
 FEATURES
 ========
+TEST
 
 Let's assume an model class named Entry, where we want to define the "image" column
 as a "file_upload" column.
