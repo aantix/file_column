@@ -1,6 +1,27 @@
+0) Create file_column.yml file by doing :
+rake file_column:setup
+
+1) User must set up an additional column for their file_column attribute.  If there's an attribute called 'image'
+they should have a boolean column called 'image_synced'.  Default value should be false
+
+3) Extend ActiveRecord by providing a module/mixin.  
+
+Read in the asset host name, host username (optional), host password (optional), file root
+
+That will provide a function called 'sync_assets'
+Sync assets will go through all attributes and find all file_column attributes with an associated '_synced' attribute.
+For each of those attributes, it will attempt to SCP the newly created asset to the host server defined in the .yml file.
+
+
+*/1 * * * * cd /var/www/rails/smsmatch/current && /usr/local/bin/ruby script/runner -e production "Photo.sync_assets"
+
+4) Modify the file_column view helper to serve up the appropriate asset; if the image hasn't been synced
+serve it from the local web server.  If it has, create an absolute path to the asset host server.
+
+
+
 FEATURES
 ========
-TEST
 
 Let's assume an model class named Entry, where we want to define the "image" column
 as a "file_upload" column.

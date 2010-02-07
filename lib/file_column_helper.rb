@@ -60,8 +60,11 @@ module FileColumnHelper
     end
 
     # parse options
-    subdir = nil
-    absolute = false
+    subdir    = nil
+    absolute  = false    
+    asset_url = nil
+    asset_url = config.action_controller.asset_host if object.respond_to?("#{method}_synced") && !object.instance_variable_get("#{method}_synced")
+    
     if options
       case options
       when Hash
@@ -76,7 +79,8 @@ module FileColumnHelper
     return nil unless relative_path
 
     url = ""
-    url << ActionController::Base.relative_url_root.to_s if absolute
+    url << ActionController::Base.relative_url_root.to_s if absolute && !asset_url
+    url << asset_url if asset_url
     url << "/"
     url << object.send("#{method}_options")[:base_url] << "/"
     url << relative_path
