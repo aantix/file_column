@@ -62,8 +62,9 @@ module FileColumnHelper
     # parse options
     subdir    = nil
     absolute  = false    
+    
     asset_url = nil
-    asset_url = config.action_controller.asset_host if object.respond_to?("#{method}_synced") && !object.instance_variable_get("#{method}_synced")
+    asset_url = FileColumnAssetConfig.property[:host] if object["#{method}_synced"] && !FileColumnAssetConfig.property[:host].blank?
     
     if options
       case options
@@ -141,10 +142,12 @@ module FileColumnHelper
     when String, Symbol
       object = instance_variable_get("@#{object.to_s}")
     end
+
     subdir = nil
     if options
       subdir = object.send("#{method}_state").create_magick_version_if_needed(options)
     end
+
     if subdir.nil?
       nil
     else

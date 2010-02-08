@@ -1,8 +1,13 @@
 0) Create file_column.yml file by doing :
 rake file_column:setup
 
+Edit the file_column.yml file to include your asset host configuration.
+
 1) User must set up an additional column for their file_column attribute.  If there's an attribute called 'image'
-they should have a boolean column called 'image_synced'.  Default value should be false
+they should have a boolean column called 'image_synced'.  Default value should be false.  So if you had a Product model
+you'd create a migration like the following with image_synced defaulting to false.
+
+	script/generate migration AddImageSyncedToProducts image_synced:boolean
 
 3) Extend ActiveRecord by providing a module/mixin.  
 
