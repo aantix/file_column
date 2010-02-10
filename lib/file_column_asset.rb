@@ -45,8 +45,9 @@ module FileColumnAsset
             logger.info "REMOTE_PATH = #{remote_path}"
         
             # Copy to host server
-            scp_channels[f] = Net::SCP.upload!(FileColumnAssetConfig.property[:host], FileColumnAssetConfig.property[:username], local_path, remote_path, :password => FileColumnAssetConfig.property[:password], :recursive => true) if !FileColumnAssetConfig.property[:password].blank?
-            scp_channels[f] = Net::SCP.upload!(FileColumnAssetConfig.property[:host], FileColumnAssetConfig.property[:username], local_path, remote_path, :recursive => true) if FileColumnAssetConfig.property[:password].blank?
+            logger.info "#{FileColumnAssetConfig.property[:host]}, #{FileColumnAssetConfig.property[:user]}, #{FileColumnAssetConfig.property[:password]}"
+            scp_channels[f] = Net::SCP.upload!(FileColumnAssetConfig.property[:host], FileColumnAssetConfig.property[:user], local_path, remote_path, :password => FileColumnAssetConfig.property[:password], :recursive => true) if !FileColumnAssetConfig.property[:password].blank?
+            scp_channels[f] = Net::SCP.upload!(FileColumnAssetConfig.property[:host], FileColumnAssetConfig.property[:user], local_path, remote_path, :recursive => true) if FileColumnAssetConfig.property[:password].blank?
         
           end
           
@@ -63,29 +64,43 @@ module FileColumnAsset
   
       # E.g. /Users/jim/myapp/public/product/image/0000/0001/
       def local_file_path(f, col_name)
-        r = f.send("#{col_name}_relative_path")        
-        File.join(RAILS_ROOT, 'public', name.underscore, r)
+        r = f.send("#{col_name}_relative_dir")        
+        File.join(RAILS_ROOT, 'public', name.underscore, col_name, r)
       end
   
       # Looks through the channel hash to see if any uploads have completed.
       #  If they have, go ahead and mark the db entry as complete.  
       #  Return final number of free channels.
       def process_channels(channels, col_name, sync_col)
-        channels.each do |f, channel|
+        completed = false
+        
+        while !completed
+          completed = true
+        
+          channels.each do |f, channel|
           
-          if !channel.active?
-            local_path = local_file_path(f, col_name)
+            if !channel.active?
+              local_path = local_file_path(f, col_name)
       
-            # Mark the file as synced
-            f[sync_col] = true
-            f.save
+              # Mark the file as synced
+              f[sync_col] = true
+              f.save
       
-            # Delete from the current web server because the file
-            #  will now be referenced from the asset server.
-            FileUtils.rm_r local_path, :force => true
-          end
-      
+              # Delete from the current web server because the file
+              #  will now be referenced from the asset server.
+              FileUtils.rm_r local_path, :force => true
+            
+              # Remove the channel from the hash
+              channels.delete(channel)
+              
+            else
+              completed = false
+            end
+          
+          end # channels.each          
+          sleep(5) if !completed      
         end
+        
       end
   
       def find_unsynced_entries(sync_col, max_channels = 10)

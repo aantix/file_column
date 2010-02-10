@@ -1,3 +1,6 @@
+This is a fork 
+
+
 0) Create file_column.yml file by doing :
 rake file_column:setup
 
