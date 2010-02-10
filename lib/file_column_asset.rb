@@ -25,7 +25,9 @@ module FileColumnAsset
       #  haven't been replicated over, and do so according to the host params setup
       #  in the file_column.yml
       def sync_to_host(cols)
-        max_channels = 3
+        max_channels    = 3
+        opts            = {}
+        opts[:password] = FileColumnAssetConfig.property[:password] if !FileColumnAssetConfig.property[:password].blank?
     
         cols.each do |col|
       
@@ -46,8 +48,10 @@ module FileColumnAsset
         
             # Copy to host server
             logger.info "#{FileColumnAssetConfig.property[:host]}, #{FileColumnAssetConfig.property[:user]}, #{FileColumnAssetConfig.property[:password]}"
-            scp_channels[f] = Net::SCP.upload!(FileColumnAssetConfig.property[:host], FileColumnAssetConfig.property[:user], local_path, remote_path, :password => FileColumnAssetConfig.property[:password], :recursive => true) if !FileColumnAssetConfig.property[:password].blank?
-            scp_channels[f] = Net::SCP.upload!(FileColumnAssetConfig.property[:host], FileColumnAssetConfig.property[:user], local_path, remote_path, :recursive => true) if FileColumnAssetConfig.property[:password].blank?
+            
+            Net::SCP.start(FileColumnAssetConfig.property[:host], FileColumnAssetConfig.property[:user], opts) do |scp|
+              scp_channels[f] = scp.upload( local_path, remote_path, :recursive => true)              
+            end
         
           end
           

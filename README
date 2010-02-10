@@ -1,31 +1,23 @@
-This is a fork 
+FORK OF THE ORIGINAL FILE_COLUMN
+================================
 
+Purpose: Replicates the uploaded asset to a specified asset server.
 
 0) Create file_column.yml file by doing :
 rake file_column:setup
 
 Edit the file_column.yml file to include your asset host configuration.
 
-1) User must set up an additional column for their file_column attribute.  If there's an attribute called 'image'
-they should have a boolean column called 'image_synced'.  Default value should be false.  So if you had a Product model
+1) You must set up an additional column for your file_column asset.  If there's an attribute called 'image'
+you should have a boolean column called 'image_synced'.  Default value should be false.  So if you had a Product model
 you'd create a migration like the following with image_synced defaulting to false.
 
 	script/generate migration AddImageSyncedToProducts image_synced:boolean
 
-3) Extend ActiveRecord by providing a module/mixin.  
-
-Read in the asset host name, host username (optional), host password (optional), file root
-
-That will provide a function called 'sync_assets'
-Sync assets will go through all attributes and find all file_column attributes with an associated '_synced' attribute.
-For each of those attributes, it will attempt to SCP the newly created asset to the host server defined in the .yml file.
-
-
 */1 * * * * cd /var/www/rails/smsmatch/current && /usr/local/bin/ruby script/runner -e production "Photo.sync_assets"
 
-4) Modify the file_column view helper to serve up the appropriate asset; if the image hasn't been synced
+2) Modify the file_column view helper to serve up the appropriate asset; if the image hasn't been synced
 serve it from the local web server.  If it has, create an absolute path to the asset host server.
-
 
 
 FEATURES
